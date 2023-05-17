@@ -1,14 +1,30 @@
-#include<stdio.h>
-#include<math.h>
-#include<stdlib.h>
-#include<string.h>
-#include<stdbool.h>
-int main(){
-    // int *arr=(int*)malloc(sizeof(int)*6);
-    int a=112111;
-    int b=16;
-    printf("%d", a%b);
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int privateVar;
+} MyClass;
+
+MyClass* createMyClass() {
+    MyClass* obj = (MyClass*)malloc(sizeof(MyClass));
+    obj->privateVar = 0;
+    return obj;
+}
+
+void setPrivateVar(MyClass* obj, int value) {
+    obj->privateVar = value;
+}
+
+int getPrivateVar(MyClass* obj) {
+    return obj->privateVar;
+}
+
+int main() {
+    MyClass* obj = createMyClass();
+    setPrivateVar(obj, 42);
+    printf("%d\n", getPrivateVar(obj));
+
+    free(obj);
 
     return 0;
 }
-
