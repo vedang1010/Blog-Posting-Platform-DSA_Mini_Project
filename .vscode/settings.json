@@ -45,6 +45,9 @@
     "optional": "c",
     "string_view": "c",
     "string": "c",
-    "system_error": "c"
+    "system_error": "c",
+    "stdio.h": "c",
+    "stdlib.h": "c",
+    "string.h": "c"
   }
 }
