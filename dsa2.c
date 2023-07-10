@@ -3,7 +3,7 @@
 #include <string.h>
 #define MAX_USERS 1000
 #define MAX_FRIENDS 100
-#define MAX_INTERESTS 100
+#define MAX_INTERESTS 120
 // Structure to represent a Post
 struct Post
 {
