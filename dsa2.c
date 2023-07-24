@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/types.h>
+#define DT_REG 8
 #define MAX_USERS 1000
 #define MAX_FRIENDS 100
 #define MAX_INTERESTS 120
@@ -23,7 +26,6 @@ struct User
     struct Post *posts_list;
     char **interests;
     int num_interests;
-
 };
 
 // Structure to represent the Social Network
@@ -46,7 +48,6 @@ struct HashMap
     struct HashMapNode **table;
 };
 
-
 // Function to create a new social network
 struct SocialNetwork *createSocialNetwork()
 {
@@ -56,7 +57,7 @@ struct SocialNetwork *createSocialNetwork()
     return network;
 }
 
-//Hashmap functions:-
+// Hashmap functions:-
 
 struct HashMap *createHashMap(int capacity)
 {
@@ -84,7 +85,7 @@ int hashFunction(struct HashMap *hashMap, const char *key)
     return sum % hashMap->capacity;
 }
 
-void insert(struct HashMap *hashMap, const char *key,const char *value)
+void insert(struct HashMap *hashMap, const char *key, const char *value)
 {
     int index = hashFunction(hashMap, key);
 
@@ -92,7 +93,7 @@ void insert(struct HashMap *hashMap, const char *key,const char *value)
     strcpy(newNode->username, key);
     strcpy(newNode->password, value);
     newNode->next = hashMap->table[index];
-        // newNode->next = NULL;
+    // newNode->next = NULL;
 
     hashMap->table[index] = newNode;
 }
@@ -126,6 +127,7 @@ int usernameExists(struct SocialNetwork *network, const char *username)
 
     return 0; // Username does not exist
 }
+
 // Function to add a new user to the social network
 void addUser(struct SocialNetwork *network, struct HashMap *map, char *username, char *password)
 {
@@ -150,8 +152,6 @@ void addUser(struct SocialNetwork *network, struct HashMap *map, char *username,
     insert(map, username, password);
     printf("User '%s' registered successfully.\n", username);
 }
-
-
 
 // Function to find a user by username
 struct User *findUser(struct SocialNetwork *network, char *username)
@@ -212,19 +212,19 @@ void addPost(struct User *user)
     char folderPath[100];
     snprintf(folderPath, sizeof(folderPath), "posts/%s", user->username);
 
-    // Create the user's posts folder if it doesn't exist
-    #ifdef _WIN32
-        _mkdir("posts");
-    #else
-        mkdir("posts", 0777);
-    #endif
+// Create the user's posts folder if it doesn't exist
+#ifdef _WIN32
+    _mkdir("posts");
+#else
+    mkdir("posts", 0777);
+#endif
 
-    // Create the user's folder if it doesn't exist
-    #ifdef _WIN32
-        _mkdir(folderPath);
-    #else
-        mkdir(folderPath, 0777);
-    #endif
+// Create the user's folder if it doesn't exist
+#ifdef _WIN32
+    _mkdir(folderPath);
+#else
+    mkdir(folderPath, 0777);
+#endif
 
     // Generate the file path for the new text post
     char postFilePath[100];
@@ -244,7 +244,6 @@ void addPost(struct User *user)
     // Close the file
     fclose(fp);
 
-    
     struct Post *newPost = (struct Post *)malloc(sizeof(struct Post));
     // strcpy(newPost->content, post);
     newPost->fp = fp;
@@ -267,8 +266,6 @@ void addPost(struct User *user)
     printf("Post added successfully.\n");
 }
 
-
-
 // Function to show the posts of a user
 void showPosts(struct User *user)
 {
@@ -277,45 +274,47 @@ void showPosts(struct User *user)
         printf("Error: Invalid user.\n");
         return;
     }
-    
-    if(num_post(user->posts_list)==0)
-    {
-        printf("No posts found for user %s\n",user->username);
-    }
 
+    if (num_post(user->posts_list) == 0)
+    {
+        printf("No posts found for user %s\n", user->username);
+    }
 
     printf("Showing posts of user '%s':\n", user->username);
 
-    for (int i = 0; i <num_post(user->posts_list); i++) {
+    for (int i = 0; i < num_post(user->posts_list); i++)
+    {
         char filePath[120];
         sprintf(filePath, "posts/%s/%d.txt", user->username, i);
 
         FILE *file = fopen(filePath, "r");
-        if (file == NULL) {
+        if (file == NULL)
+        {
             printf("Error accessing post %d for friend: %s\n", i + 1, user->username);
             continue;
         }
 
         printf("Post %d:\n", i + 1);
         char post[100];
-        while (fgets(post, sizeof(post), file) != NULL) {
+        while (fgets(post, sizeof(post), file) != NULL)
+        {
             printf("%s", post);
         }
         printf("\n");
 
         fclose(file);
     }
-
-
 }
 
+void resetPassword(struct HashMap *hashMap, const char *key, const char *newPassword)
+{
+    int index = hashFunction(hashMap, key);
 
-void resetPassword(struct HashMap* hashMap, const char* key, const char* newPassword) {
-    int index = hashFunction(hashMap,key);
-
-    struct HashMapNode* currentNode = hashMap->table[index];
-    while (currentNode != NULL) {
-        if (strcmp(currentNode->username, key) == 0) {
+    struct HashMapNode *currentNode = hashMap->table[index];
+    while (currentNode != NULL)
+    {
+        if (strcmp(currentNode->username, key) == 0)
+        {
             strcpy(currentNode->password, newPassword);
             printf("Password reset successful.\n");
             return;
@@ -441,7 +440,6 @@ void displayGraph(struct SocialNetwork *network)
     }
 }
 
-
 struct User *createUser(const char *username, const char *password)
 {
     struct User *user = (struct User *)malloc(sizeof(struct User));
@@ -454,14 +452,14 @@ struct User *createUser(const char *username, const char *password)
     return user;
 }
 
-void addUserfromFile(struct SocialNetwork *network, struct HashMap *map,const char *username, const char *password)
+void addUserfromFile(struct SocialNetwork *network, struct HashMap *map, const char *username, const char *password)
 {
     if (network->num_users >= MAX_USERS)
     {
         printf("Maximum number of users reached.\n");
         return;
     }
-    addUser(network,map,username,password);
+    addUser(network, map, username, password);
     // struct User *user = createUser(username, password);
     // network->users_list[network->num_users] = user;
     // network->num_users++;
@@ -509,7 +507,7 @@ int getUserIndex(struct SocialNetwork *network, struct User *user)
     return -1;
 }
 
-void readUsersFromCSV(const char *filename, struct SocialNetwork *network,struct HashMap *map)
+void readUsersFromCSV(const char *filename, struct SocialNetwork *network, struct HashMap *map)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
@@ -526,7 +524,7 @@ void readUsersFromCSV(const char *filename, struct SocialNetwork *network,struct
         char username[20];
         char password[20];
         sscanf(line, "%[^,],%s", username, password);
-        addUserfromFile(network,map ,username, password);
+        addUserfromFile(network, map, username, password);
     }
 
     fclose(file);
@@ -548,7 +546,7 @@ void readFriendsFromCSV(const char *filename, struct SocialNetwork *network)
     {
         int userIndex, friendIndex;
         sscanf(line, "%d,%d", &userIndex, &friendIndex);
-        
+
         if (userIndex < 0 || userIndex >= network->num_users ||
             friendIndex < 0 || friendIndex >= network->num_users)
         {
@@ -581,7 +579,7 @@ void readInterestsFromCSV(const char *filename, struct SocialNetwork *network)
         int userIndex;
         char interest[20];
         sscanf(line, "%d,%s", &userIndex, interest);
-        
+
         if (userIndex < 0 || userIndex >= network->num_users)
         {
             printf("Invalid user index.\n");
@@ -659,6 +657,70 @@ void writeInterestsToCSV(const char *filename, struct SocialNetwork *network)
     fclose(file);
 }
 
+// Function to add posts to a user from their folder
+void addPostsFromFolder(struct SocialNetwork *network){
+    for (int i = 0; i < network->num_users; i++){
+        addPostFromFolder(network->users_list[i],network->users_list[i]->username);
+    }
+
+}
+
+void addPostFromFolder(struct User *user, const char *username)
+{
+    // Generate the folder path for the user's posts
+    char folderPath[100];
+    snprintf(folderPath, sizeof(folderPath), "posts/%s", username);
+
+    // Open the user's folder
+    DIR *dir = opendir(folderPath);
+    if (dir == NULL)
+    {
+        // printf("Error: Unable to open folder for user '%s'.\n", username);
+        return;
+    }
+
+    // Read posts from the user's folder and add them to the user's posts list
+    struct dirent *ent;
+    while ((ent = readdir(dir)) != NULL)
+    {
+        if (ent->d_type == DT_REG)
+        {
+            // Generate the file path for the post
+            char postFilePath[100];
+            snprintf(postFilePath, sizeof(postFilePath), "%s/%s", folderPath, ent->d_name);
+
+            // Open the file in read mode
+            FILE *fp = fopen(postFilePath, "r");
+            if (fp == NULL)
+            {
+                printf("Error opening post file '%s'.\n", postFilePath);
+                continue;
+            }
+
+            // Create a new post node and add it to the user's posts list
+            struct Post *newPost = (struct Post *)malloc(sizeof(struct Post));
+            newPost->fp = fp;
+            newPost->next = NULL;
+
+            if (user->posts_list == NULL)
+            {
+                user->posts_list = newPost;
+            }
+            else
+            {
+                struct Post *temp = user->posts_list;
+                while (temp->next != NULL)
+                {
+                    temp = temp->next;
+                }
+                temp->next = newPost;
+            }
+        }
+    }
+
+    // Close the user's folder
+    closedir(dir);
+}
 
 
 int main()
@@ -666,10 +728,13 @@ int main()
     struct SocialNetwork *network = createSocialNetwork();
     struct HashMap *map = createHashMap(100);
     struct User *currentUser = NULL;
-    readUsersFromCSV("users.csv", network,map);
+    readUsersFromCSV("users.csv", network, map);
     readFriendsFromCSV("friends.csv", network);
     readInterestsFromCSV("interests.csv", network);
-    int choice,ch,choose;
+    addPostsFromFolder(network);
+
+    int choice, ch, choose;
+
     // addUserFromFile(network,map,"user.txt");
     while (1)
     {
@@ -677,7 +742,7 @@ int main()
         printf("1. Register\n");
         printf("2. Login\n");
         printf("3. Show social_network\n");
-        
+
         printf("4. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
@@ -699,7 +764,7 @@ int main()
             scanf("%s", password);
 
             addUser(network, map, username, password);
-                        writeUsersToCSV("users.csv", network);
+            writeUsersToCSV("users.csv", network);
 
             break;
         }
@@ -745,7 +810,6 @@ int main()
             printf("Showing social_network.\n");
             displayGraph(network);
             break;
-        
 
             break;
         case 4:
@@ -789,7 +853,7 @@ int main()
                 {
                     printf("User '%s' not found.\n", friendName);
                 }
-                                writeFriendsToCSV("friends.csv", network);
+                writeFriendsToCSV("friends.csv", network);
 
                 break;
             }
@@ -813,7 +877,7 @@ int main()
                 }
                 break;
             }
-            
+
             case 5:
             {
                 char friendName[20];
@@ -821,9 +885,9 @@ int main()
                 scanf("%s", friendName);
 
                 struct User *friend = findUser(network, friendName);
-                if (friend != NULL  && friend->username != currentUser->username)
+                if (friend != NULL && friend->username != currentUser->username)
                 {
-                    while (choose!=4)
+                    while (choose != 4)
                     {
                         printf("\n----- VISIT FRIEND MENU -----\n");
                         printf("1. Show Friends\n");
@@ -854,7 +918,7 @@ int main()
                             break;
 
                         case 3:
-                            
+
                             show_interests(friend);
                             break;
 
@@ -866,12 +930,11 @@ int main()
                             // printf("Invalid choice. Please try again.\n");
                             break;
                         }
-
                     }
-                    choose=0;
+                    choose = 0;
                 }
 
-                else if(friend->username == currentUser->username)
+                else if (friend->username == currentUser->username)
                 {
                     printf("Error! Enter Friend's Username");
                 }
@@ -887,8 +950,8 @@ int main()
             {
                 char newPassword[20];
                 printf("Enter new password");
-                scanf("%s",newPassword);
-                resetPassword(map,currentUser->username,newPassword);
+                scanf("%s", newPassword);
+                resetPassword(map, currentUser->username, newPassword);
                 break;
             }
 
