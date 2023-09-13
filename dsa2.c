@@ -150,7 +150,7 @@ void addUser(struct SocialNetwork *network, struct HashMap *map, char *username,
     network->users_list[network->num_users] = newUser;
     network->num_users++;
     insert(map, username, password);
-    printf("User '%s' registered successfully.\n", username);
+    // printf("User '%s' registered successfully.\n", username);
 }
 
 // Function to find a user by username
@@ -658,7 +658,7 @@ void writeInterestsToCSV(const char *filename, struct SocialNetwork *network)
 }
 
 // Function to add posts to a user from their folder
-void addPostsFromFolder(struct SocialNetwork *network){
+void addPosts_FromFolder(struct SocialNetwork *network){
     for (int i = 0; i < network->num_users; i++){
         addPostFromFolder(network->users_list[i],network->users_list[i]->username);
     }
@@ -725,13 +725,14 @@ void addPostFromFolder(struct User *user, const char *username)
 
 int main()
 {
+    
     struct SocialNetwork *network = createSocialNetwork();
     struct HashMap *map = createHashMap(100);
     struct User *currentUser = NULL;
     readUsersFromCSV("users.csv", network, map);
     readFriendsFromCSV("friends.csv", network);
     readInterestsFromCSV("interests.csv", network);
-    addPostsFromFolder(network);
+    addPosts_FromFolder(network);
 
     int choice, ch, choose;
 
